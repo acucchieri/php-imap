@@ -1,0 +1,146 @@
+<?php
+
+namespace AC\Imap;
+
+
+class Message
+{
+    private $no;
+    private $uid;
+    private $stream;
+    private $header;
+
+    public function __construct($stream, $no)
+    {
+        $this->stream = $stream;
+        $this->no = $no;
+        $this->uid = imap_uid($this->stream, $no);
+        $this->header = imap_headerinfo($this->stream, $this->no);
+    }
+
+
+    public function getSubject()
+    {
+        $subject= '';
+        $elements = imap_mime_header_decode($this->header->subject);
+        foreach ($elements as $element) {
+            $subject .= $element->text;
+        }
+
+        return $subject;
+    }
+
+    public function getBodyPlain()
+    {
+        return imap_qprint(imap_fetchbody($this->stream, $this->no, 1, FT_PEEK));
+    }
+
+    public function getBodyHtml()
+    {
+        return imap_qprint(imap_fetchbody($this->stream, $this->no, 2, FT_PEEK));
+    }
+
+    /**
+     * Sets flags on messages
+     *
+     * @param array $flags The flags
+     * "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
+     * @return bool Returns TRUE on success or FALSE on failure.
+     */
+    public function setFlags(array $flags)
+    {
+        $flag = implode(' ', $flags);
+        $status =  imap_setflag_full($this->stream, $this->no, $flag);
+        $this->header = imap_headerinfo($this->stream, $this->no);
+
+        return $status;
+    }
+
+    /**
+     * Clears flags on messages
+     *
+     * @param array $flags The flags
+     * "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
+     * @return bool Returns TRUE on success or FALSE on failure.
+     */
+    public function clearFlags(array $flags)
+    {
+        $flag = implode(' ', $flags);
+        $status =  imap_clearflag_full($this->stream, $this->no, $flag);
+        $this->header = imap_headerinfo($this->stream, $this->no);
+
+        return $status;
+    }
+
+
+
+    public function isMarkAsAnswered()
+    {
+        return $this->header->Answered === 'A';
+    }
+
+    public function isMarkAsDeleted()
+    {
+        return $this->header->Deleted === 'D';
+    }
+
+    public function isMarkAsDraft()
+    {
+        return $this->header->Draft === 'X';
+    }
+
+    public function isMarkAsImportant()
+    {
+        return $this->header->Flagged === 'F';
+    }
+
+    public function isMarkAsRecent()
+    {
+        return $this->header->Recent === 'R';
+    }
+
+    public function isMarkAsUnread()
+    {
+        return $this->header->Recent === 'N' || $this->header->Unseen === 'U';
+    }
+
+    public function markAsAnswered()
+    {
+        return $this->setFlags(array('\\Answered'));
+    }
+
+    public function markAsUnanswered()
+    {
+        return $this->clearFlags(array('\\Answered'));
+    }
+
+    public function markAsDeleted()
+    {
+        return $this->setFlags(array('\\Deleted'));
+    }
+
+    public function markAsUndeleted()
+    {
+        return $this->clearFlags(array('\\Deleted'));
+    }
+
+    public function markAsImportant()
+    {
+        return $this->setFlags(array('\\Flagged'));
+    }
+
+    public function markAsNormal()
+    {
+        return $this->clearFlags(array('\\Flagged'));
+    }
+
+    public function markAsRead()
+    {
+        return $this->setFlags(array('\\Seen'));
+    }
+
+    public function markAsUnread()
+    {
+        return $this->clearFlags(array('\\Seen'));
+    }
+}

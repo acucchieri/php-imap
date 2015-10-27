@@ -1,0 +1,8 @@
+/vendor
+#OS
+*~
+*.*~
+.DS_Store
+#IDE
+/nbproject/
+.idea
