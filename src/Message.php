@@ -5,19 +5,28 @@ namespace AC\Imap;
 
 class Message
 {
-    private $no;
+//    private $no;
     private $uid;
     private $stream;
     private $header;
 
-    public function __construct($stream, $no)
+    public function __construct($stream, $uid)
     {
         $this->stream = $stream;
-        $this->no = $no;
-        $this->uid = imap_uid($this->stream, $no);
-        $this->header = imap_headerinfo($this->stream, $this->no);
+//        $this->no = $no;
+        $this->uid = $uid;
+        $this->header = imap_headerinfo($this->stream, imap_msgno($this->stream, $this->uid));
     }
 
+    public function getNo()
+    {
+        return imap_msgno($this->stream, $this->uid);
+    }
+
+    public function getUid()
+    {
+        return $this->uid;
+    }
 
     public function getSubject()
     {
@@ -32,12 +41,12 @@ class Message
 
     public function getBodyPlain()
     {
-        return imap_qprint(imap_fetchbody($this->stream, $this->no, 1, FT_PEEK));
+        return imap_qprint(imap_fetchbody($this->stream, $this->uid, 1, FT_UID | FT_PEEK));
     }
 
     public function getBodyHtml()
     {
-        return imap_qprint(imap_fetchbody($this->stream, $this->no, 2, FT_PEEK));
+        return imap_qprint(imap_fetchbody($this->stream, $this->uid, 2, FT_UID | FT_PEEK));
     }
 
     /**
@@ -50,8 +59,8 @@ class Message
     public function setFlags(array $flags)
     {
         $flag = implode(' ', $flags);
-        $status =  imap_setflag_full($this->stream, $this->no, $flag);
-        $this->header = imap_headerinfo($this->stream, $this->no);
+        $status =  imap_setflag_full($this->stream, $this->uid, $flag, ST_UID);
+        $this->header = imap_headerinfo($this->stream, imap_msgno($this->stream, $this->uid));
 
         return $status;
     }
@@ -66,8 +75,8 @@ class Message
     public function clearFlags(array $flags)
     {
         $flag = implode(' ', $flags);
-        $status =  imap_clearflag_full($this->stream, $this->no, $flag);
-        $this->header = imap_headerinfo($this->stream, $this->no);
+        $status =  imap_clearflag_full($this->stream, $this->uid, $flag, ST_UID);
+        $this->header = imap_headerinfo($this->stream, imap_msgno($this->stream, $this->uid));
 
         return $status;
     }

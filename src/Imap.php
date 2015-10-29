@@ -73,7 +73,7 @@ class Imap
     {
         $messages = new MessageCollection();
 
-        if ($results = imap_search($this->stream, $criteria)) {
+        if ($results = imap_search($this->stream, $criteria, SE_UID)) {
             foreach ($results as $result) {
                 $messages->append(new Message($this->stream, $result));
             }
@@ -134,10 +134,4 @@ class Imap
     }
 
 
-    /* A coder */
-/*
-    public function copyMessages();
-
-    public function moveMessages();
-*/
 }
