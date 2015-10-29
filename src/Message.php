@@ -39,18 +39,28 @@ class Message
         return $subject;
     }
 
+    /**
+     * Get the body plain part
+     *
+     * @return string The body plain part
+     */
     public function getBodyPlain()
     {
         return imap_qprint(imap_fetchbody($this->stream, $this->uid, 1, FT_UID | FT_PEEK));
     }
 
+    /**
+     * Get the body html part
+     *
+     * @return string The body html part
+     */
     public function getBodyHtml()
     {
         return imap_qprint(imap_fetchbody($this->stream, $this->uid, 2, FT_UID | FT_PEEK));
     }
 
     /**
-     * Sets flags on messages
+     * Sets flags on message
      *
      * @param array $flags The flags
      * "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
@@ -66,7 +76,7 @@ class Message
     }
 
     /**
-     * Clears flags on messages
+     * Clears flags on message
      *
      * @param array $flags The flags
      * "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
@@ -81,6 +91,27 @@ class Message
         return $status;
     }
 
+    /**
+     * Move message to specified mailbox
+     *
+     * @param string $mailbox The mailbox name
+     * @return bool Returns TRUE on success or FALSE on failure.
+     */
+    public function move($mailbox)
+    {
+        return imap_mail_move($this->stream, (string)$this->uid, $mailbox, CP_UID);
+    }
+
+    /**
+     * Copy message to specified mailbox
+     *
+     * @param string $mailbox The mailbox name
+     * @return bool Returns TRUE on success or FALSE on failure.
+     */
+    public function copy($mailbox)
+    {
+        return imap_mail_copy($this->stream, (string)$this->uid, $mailbox, CP_UID);
+    }
 
 
     public function isMarkAsAnswered()

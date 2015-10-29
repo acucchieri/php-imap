@@ -75,7 +75,7 @@ class Imap
 
         if ($results = imap_search($this->stream, $criteria, SE_UID)) {
             foreach ($results as $result) {
-                $messages->append(new Message($this->stream, $result));
+                $messages->add(new Message($this->stream, $result));
             }
         }
 
@@ -132,6 +132,4 @@ class Imap
             throw new \Exception(sprintf('cannot connect to mailbox %s', $this->mailbox));
         }
     }
-
-
 }
