@@ -5,7 +5,6 @@ namespace AC\Imap;
 
 class Message
 {
-//    private $no;
     private $uid;
     private $stream;
     private $header;
@@ -13,31 +12,45 @@ class Message
     public function __construct($stream, $uid)
     {
         $this->stream = $stream;
-//        $this->no = $no;
         $this->uid = $uid;
-        $this->header = imap_headerinfo($this->stream, imap_msgno($this->stream, $this->uid));
+        $this->header = imap_headerinfo($this->stream, $this->msgno());
     }
 
+    /**
+     * Gets the message sequence number
+     *
+     * @return type
+     */
     public function getNo()
     {
-        return imap_msgno($this->stream, $this->uid);
+        return $this->msgno();
     }
 
+    /**
+     * Gets the message UID
+     *
+     * @return int
+     */
     public function getUid()
     {
         return $this->uid;
     }
 
     /**
-     * Get the message date
-     * 
-     * @return \DateTime
+     * Gets the message date
+     *
+     * @return int
      */
     public function getDate()
     {
         return new \DateTime($this->header->date);
     }
 
+    /**
+     * Gets the message subject
+     *
+     * @return string
+     */
     public function getSubject()
     {
         $subject= '';
@@ -50,7 +63,7 @@ class Message
     }
 
     /**
-     * Get the body plain part
+     * Gets the body plain part
      *
      * @return string The body plain part
      */
@@ -60,7 +73,7 @@ class Message
     }
 
     /**
-     * Get the body html part
+     * Gets the body html part
      *
      * @return string The body html part
      */
@@ -80,7 +93,7 @@ class Message
     {
         $flag = implode(' ', $flags);
         $status =  imap_setflag_full($this->stream, $this->uid, $flag, ST_UID);
-        $this->header = imap_headerinfo($this->stream, imap_msgno($this->stream, $this->uid));
+        $this->header = imap_headerinfo($this->stream, $this->msgno());
 
         return $status;
     }
@@ -96,7 +109,7 @@ class Message
     {
         $flag = implode(' ', $flags);
         $status =  imap_clearflag_full($this->stream, $this->uid, $flag, ST_UID);
-        $this->header = imap_headerinfo($this->stream, imap_msgno($this->stream, $this->uid));
+        $this->header = imap_headerinfo($this->stream, $this->msgno());
 
         return $status;
     }
@@ -192,5 +205,11 @@ class Message
     public function markAsUnread()
     {
         return $this->clearFlags(array('\\Seen'));
+    }
+
+
+    private function msgno()
+    {
+        return imap_msgno($this->stream, $this->uid);
     }
 }
