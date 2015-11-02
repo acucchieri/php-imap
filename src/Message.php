@@ -28,6 +28,16 @@ class Message
         return $this->uid;
     }
 
+    /**
+     * Get the message date
+     * 
+     * @return \DateTime
+     */
+    public function getDate()
+    {
+        return new \DateTime($this->header->date);
+    }
+
     public function getSubject()
     {
         $subject= '';
