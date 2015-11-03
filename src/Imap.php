@@ -9,7 +9,6 @@ class Imap
 {
     private $config;
     private $stream;
-    private $mailbox;
 
     public function __construct($config)
     {
@@ -30,10 +29,6 @@ class Imap
         return $this->stream;
     }
 
-    public function getMailbox()
-    {
-        return $this->mailbox;
-    }
 
     /**
      * Returns a collection of messages matching the given search criteria
@@ -43,30 +38,30 @@ class Imap
      * in which the following keywords are allowed.
      * Any multi-word arguments (e.g. FROM "joey smith") must be quoted.
      * Results will match all criteria entries.
-     * ALL - return all messages matching the rest of the criteria
-     * ANSWERED - match messages with the \\ANSWERED flag set
-     * BCC "string" - match messages with "string" in the Bcc: field
-     * BEFORE "date" - match messages with Date: before "date"
-     * BODY "string" - match messages with "string" in the body of the message
-     * CC "string" - match messages with "string" in the Cc: field
-     * DELETED - match deleted messages
-     * FLAGGED - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set
-     * FROM "string" - match messages with "string" in the From: field
-     * KEYWORD "string" - match messages with "string" as a keyword
-     * NEW - match new messages
-     * OLD - match old messages
-     * ON "date" - match messages with Date: matching "date"
-     * RECENT - match messages with the \\RECENT flag set
-     * SEEN - match messages that have been read (the \\SEEN flag is set)
-     * SINCE "date" - match messages with Date: after "date"
-     * SUBJECT "string" - match messages with "string" in the Subject:
-     * TEXT "string" - match messages with text "string"
-     * TO "string" - match messages with "string" in the To:
-     * UNANSWERED - match messages that have not been answered
-     * UNDELETED - match messages that are not deleted
-     * UNFLAGGED - match messages that are not flagged
-     * UNKEYWORD "string" - match messages that do not have the keyword "string"
-     * UNSEEN - match messages which have not been read yet
+     *  ALL - return all messages matching the rest of the criteria
+     *  ANSWERED - match messages with the \\ANSWERED flag set
+     *  BCC "string" - match messages with "string" in the Bcc: field
+     *  BEFORE "date" - match messages with Date: before "date"
+     *  BODY "string" - match messages with "string" in the body of the message
+     *  CC "string" - match messages with "string" in the Cc: field
+     *  DELETED - match deleted messages
+     *  FLAGGED - match messages with the \\FLAGGED (sometimes referred to as Important or Urgent) flag set
+     *  FROM "string" - match messages with "string" in the From: field
+     *  KEYWORD "string" - match messages with "string" as a keyword
+     *  NEW - match new messages
+     *  OLD - match old messages
+     *  ON "date" - match messages with Date: matching "date"
+     *  RECENT - match messages with the \\RECENT flag set
+     *  SEEN - match messages that have been read (the \\SEEN flag is set)
+     *  SINCE "date" - match messages with Date: after "date"
+     *  SUBJECT "string" - match messages with "string" in the Subject:
+     *  TEXT "string" - match messages with text "string"
+     *  TO "string" - match messages with "string" in the To:
+     *  UNANSWERED - match messages that have not been answered
+     *  UNDELETED - match messages that are not deleted
+     *  UNFLAGGED - match messages that are not flagged
+     *  UNKEYWORD "string" - match messages that do not have the keyword "string"
+     *  UNSEEN - match messages which have not been read yet
      * @return MessageCollection messages collection
      */
     public function search($criteria)
@@ -83,17 +78,19 @@ class Imap
     }
 
     /**
-     * Append a string message to a specified mailbox
+     * Append a string message to a specified folder
      *
      * @param string $message The message to be append, as a string
-     * @param string $mailbox The mailbox name
+     * @param string $folder The folder name
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function append($message, $mailbox = null)
+    public function append($message, $folder = null)
     {
-        if (!$mailbox) {
-            $mailbox =  $this->mailbox;
-        }
+        $mailbox = sprintf('{%s:%s}%s',
+            $this->config['host'],
+            $this->config['port'],
+            (!$folder) ? $this->config['folder'] : $folder
+        );
 
         return imap_append($this->stream, $mailbox, $message);
     }
@@ -102,7 +99,7 @@ class Imap
      * Check current mailbox
      * @link http://php.net/manual/en/function.imap-check.php
      *
-     * @return object  Returns the information in an object
+     * @return object Returns the information in an object
      */
     public function check()
     {
@@ -121,15 +118,15 @@ class Imap
 
     private function connect()
     {
-        $this->mailbox = sprintf("{%s:%s%s}%s",
+        $mailbox = sprintf("{%s:%s%s}%s",
             $this->config['host'],
             $this->config['port'],
             ($this->config['flags']) ? '/'.implode('/', $this->config['flags']) : null,
             $this->config['folder']
         );
 
-        if (!$this->stream = imap_open($this->mailbox, $this->config['user'], $this->config['password'])) {
-            throw new \Exception(sprintf('cannot connect to mailbox %s', $this->mailbox));
+        if (!$this->stream = imap_open($mailbox, $this->config['user'], $this->config['password'])) {
+            throw new \Exception(sprintf('cannot connect to mailbox %s', $mailbox));
         }
     }
 }
