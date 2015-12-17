@@ -82,9 +82,10 @@ class Imap
      *
      * @param string $message The message to be append, as a string
      * @param string $folder The folder name
+     * @param string $options
      * @return bool Returns TRUE on success or FALSE on failure.
      */
-    public function append($message, $folder = null)
+    public function append($message, $folder = null, $options = null)
     {
         $mailbox = sprintf('{%s:%s}%s',
             $this->config['host'],
@@ -92,7 +93,7 @@ class Imap
             (!$folder) ? $this->config['folder'] : $folder
         );
 
-        return imap_append($this->stream, $mailbox, $message);
+        return imap_append($this->stream, $mailbox, $message, $options);
     }
 
     /**
