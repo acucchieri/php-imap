@@ -74,7 +74,6 @@ class Message
             $this->parseBody();
         }
 
-        // return imap_qprint(imap_fetchbody($this->stream, $this->uid, 1, FT_UID | FT_PEEK));
         return $this->body['plain'];
     }
 
@@ -89,7 +88,6 @@ class Message
             $this->parseBody();
         }
 
-        // return imap_qprint(imap_fetchbody($this->stream, $this->uid, 2, FT_UID | FT_PEEK));
         return $this->body['html'];
     }
 
