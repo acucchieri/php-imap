@@ -265,9 +265,17 @@ class Message
     {
         // nested parts
         if(isset($part->parts) && !empty($part->parts)) {
-            foreach($part->parts as $key => $obj) {
-                $this->parsePart($obj, $key + 1);
+            foreach($part->parts as $subSection => $subPart) {
+                if (2 == $part->type
+                    && 'RFC822' === $part->subtype
+                    && (!isset($part->disposition) || $part->disposition !== "attachment")
+                ) {
+                    $this->parsePart($subPart, $section);
+                } else {
+                    $this->parsePart($subPart, $section . '.' . ($subSection + 1));
+                }
             }
+
             return;
         }
 
@@ -285,18 +293,17 @@ class Message
 
         }
 
+        if ($section) {
+            $data = imap_fetchbody($this->stream, $this->uid, $section, FT_UID | FT_PEEK);
+        } else {
+            $data = imap_body($this->stream, $this->uid, FT_UID | FT_PEEK);
+        }
 
-        $data = ($section)
-                ? imap_fetchbody($this->stream, $this->uid, $section, FT_UID | FT_PEEK)
-                : imap_body($this->stream, $this->uid, FT_UID | FT_PEEK);
-
-
-// cf https://github.com/barbushin/php-imap/blob/master/src/PhpImap/Mailbox.php
-//      methode : protected function initMailPart
+        // cf https://github.com/barbushin/php-imap/blob/master/src/PhpImap/Mailbox.php
+        //      methode : protected function initMailPart
 
 
         // Nomaliser data ( => quoted print machin)
-
         // mapper data vers bodyplain, bodyhtml, attachments
         // attention :  - penser a concatener bodyplain et bodyhtml
         //              - penser a decoder (imap_qprint) puis convertir en utf-8 si besoin (utf8_encode)
@@ -306,13 +313,13 @@ class Message
             case ENC7BIT:               // 0
                 break;
             case ENC8BIT:               // 1
-//                $data = imap_utf8($data);   // A MIME encoded string => UTF-8 encoded string
+                // $data = imap_utf8($data);   // A MIME encoded string => UTF-8 encoded string
                 break;
             case ENCBINARY:             // 2
-//                $data = imap_binary($data); // 8bit string => base64 string
+                // $data = imap_binary($data); // 8bit string => base64 string
                 break;
             case ENCBASE64:             // 3
-//                $data = preg_replace('~[^a-zA-Z0-9+=/]+~s', '', $data); // https://github.com/barbushin/php-imap/issues/88
+                // $data = preg_replace('~[^a-zA-Z0-9+=/]+~s', '', $data); // https://github.com/barbushin/php-imap/issues/88
                 $data = imap_base64($data); // base64 encoded data => original string
                 break;
             case ENCQUOTEDPRINTABLE:    // 4
@@ -323,7 +330,7 @@ class Message
         }
 
 
-	switch($part->type) {
+        switch($part->type) {
             case TYPETEXT:          // 0 : text plain or html
                 if (isset($parameters['charset']) &&  $parameters['charset'] == 'ISO-8859-1' ) {
                     if ('iso-8859-1' === strtolower($parameters['charset'])) {
@@ -360,7 +367,6 @@ class Message
                 break;
         }
     }
-
 
     private function mimeDecode($original)
     {
