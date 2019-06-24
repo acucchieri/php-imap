@@ -1,14 +1,22 @@
 <?php
 
+/*
+ * This file is part of the php-imap package.
+ *
+ * (c) acucchieri <https://github.com/acucchieri>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace AC\Imap\Collection;
 
 use AC\Imap\Message;
 
-
 /**
- * Messages Collection
+ * Messages Collection.
  *
- * @author Alban Cucchieri
+ * @author acucchieri <https://github.com/acucchieri>
  */
 class MessageCollection extends \ArrayObject
 {
@@ -17,9 +25,8 @@ class MessageCollection extends \ArrayObject
         parent::__construct($array);
     }
 
-
     /**
-     * Set the internal pointer to the first element and returns it
+     * Set the internal pointer to the first element and returns it.
      *
      * @return Message The first message of the collection
      */
@@ -29,7 +36,7 @@ class MessageCollection extends \ArrayObject
     }
 
     /**
-     * Set the internal pointer to the last element and returns it
+     * Set the internal pointer to the last element and returns it.
      *
      * @return Message The last message of the collection
      */
@@ -39,9 +46,10 @@ class MessageCollection extends \ArrayObject
     }
 
     /**
-     * Add a Message at the end of the collection
+     * Add a Message at the end of the collection.
      *
      * @param Message $message The message
+     *
      * @return MessageCollection
      */
     public function add(Message $message)
@@ -52,10 +60,11 @@ class MessageCollection extends \ArrayObject
     }
 
     /**
-     * Removes the Message from the collection
+     * Removes the Message from the collection.
      *
      * @param Message $message The message
-     * @return MessageCollection or FALSE if Message not found in the collection
+     *
+     * @return MessageCollection|false or FALSE if Message not found in the collection
      */
     public function remove(Message $message)
     {
@@ -76,18 +85,18 @@ class MessageCollection extends \ArrayObject
     }
 
     /**
-     * Determine whether the collection is empty
+     * Determine whether the collection is empty.
      *
-     * @return boolean TRUE if the collection is empty, FALSE otherwise.
+     * @return bool TRUE if the collection is empty, FALSE otherwise
      */
     public function isEmpty()
     {
-        return $this->count() === 0;
+        return 0 === $this->count();
     }
 
     /**
      * Return a php array of Messages
-     * Alias of \ArrayObject::getArrayCopy()
+     * Alias of \ArrayObject::getArrayCopy().
      *
      * @return array
      */

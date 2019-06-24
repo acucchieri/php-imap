@@ -1,8 +1,21 @@
 <?php
 
+/*
+ * This file is part of the php-imap package.
+ *
+ * (c) acucchieri <https://github.com/acucchieri>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace AC\Imap;
 
-
+/**
+ * Message class.
+ *
+ * @author acucchieri <https://github.com/acucchieri>
+ */
 class Message
 {
     private $uid;
@@ -10,7 +23,7 @@ class Message
     private $header;
     private $body = array(
         'plain' => '',
-        'html'  => '',
+        'html' => '',
         'other' => '',
     );
     private $attachments = array();
@@ -24,9 +37,9 @@ class Message
     }
 
     /**
-     * Gets the message sequence number
+     * Gets the message sequence number.
      *
-     * @return type
+     * @return int
      */
     public function getNo()
     {
@@ -34,7 +47,7 @@ class Message
     }
 
     /**
-     * Gets the message UID
+     * Gets the message UID.
      *
      * @return int
      */
@@ -44,9 +57,9 @@ class Message
     }
 
     /**
-     * Gets the message date
+     * Gets the message date.
      *
-     * @return int
+     * @return \DateTime
      */
     public function getDate()
     {
@@ -54,7 +67,7 @@ class Message
     }
 
     /**
-     * Gets the message subject
+     * Gets the message subject.
      *
      * @return string
      */
@@ -64,7 +77,7 @@ class Message
     }
 
     /**
-     * Gets the body plain part
+     * Gets the body plain part.
      *
      * @return string The body plain part
      */
@@ -78,7 +91,7 @@ class Message
     }
 
     /**
-     * Gets the body html part
+     * Gets the body html part.
      *
      * @return string The body html part
      */
@@ -92,7 +105,6 @@ class Message
     }
 
     /**
-     *
      * @return array
      */
     public function getAttachments()
@@ -105,88 +117,91 @@ class Message
     }
 
     /**
-     * Sets flags on message
+     * Sets flags on message.
      *
      * @param array $flags The flags
-     * "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
-     * @return bool Returns TRUE on success or FALSE on failure.
+     *                     "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
+     *
+     * @return bool returns TRUE on success or FALSE on failure
      */
     public function setFlags(array $flags)
     {
         $flag = implode(' ', $flags);
-        $status =  imap_setflag_full($this->stream, $this->uid, $flag, ST_UID);
+        $status = imap_setflag_full($this->stream, $this->uid, $flag, ST_UID);
         $this->header = imap_headerinfo($this->stream, $this->msgno());
 
         return $status;
     }
 
     /**
-     * Clears flags on message
+     * Clears flags on message.
      *
      * @param array $flags The flags
-     * "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
-     * @return bool Returns TRUE on success or FALSE on failure.
+     *                     "\\Seen", "\\Answered", "\\Flagged", "\\Deleted" ou "\\Draft"
+     *
+     * @return bool returns TRUE on success or FALSE on failure
      */
     public function clearFlags(array $flags)
     {
         $flag = implode(' ', $flags);
-        $status =  imap_clearflag_full($this->stream, $this->uid, $flag, ST_UID);
+        $status = imap_clearflag_full($this->stream, $this->uid, $flag, ST_UID);
         $this->header = imap_headerinfo($this->stream, $this->msgno());
 
         return $status;
     }
 
     /**
-     * Move message to specified mailbox
+     * Move message to specified mailbox.
      *
      * @param string $mailbox The mailbox name
-     * @return bool Returns TRUE on success or FALSE on failure.
+     *
+     * @return bool returns TRUE on success or FALSE on failure
      */
     public function move($mailbox)
     {
-        return imap_mail_move($this->stream, (string)$this->uid, $mailbox, CP_UID);
+        return imap_mail_move($this->stream, (string) $this->uid, $mailbox, CP_UID);
     }
 
     /**
-     * Copy message to specified mailbox
+     * Copy message to specified mailbox.
      *
      * @param string $mailbox The mailbox name
-     * @return bool Returns TRUE on success or FALSE on failure.
+     *
+     * @return bool returns TRUE on success or FALSE on failure
      */
     public function copy($mailbox)
     {
-        return imap_mail_copy($this->stream, (string)$this->uid, $mailbox, CP_UID);
+        return imap_mail_copy($this->stream, (string) $this->uid, $mailbox, CP_UID);
     }
-
 
     public function isMarkAsAnswered()
     {
-        return $this->header->Answered === 'A';
+        return 'A' === $this->header->Answered;
     }
 
     public function isMarkAsDeleted()
     {
-        return $this->header->Deleted === 'D';
+        return 'D' === $this->header->Deleted;
     }
 
     public function isMarkAsDraft()
     {
-        return $this->header->Draft === 'X';
+        return 'X' === $this->header->Draft;
     }
 
     public function isMarkAsImportant()
     {
-        return $this->header->Flagged === 'F';
+        return 'F' === $this->header->Flagged;
     }
 
     public function isMarkAsRecent()
     {
-        return $this->header->Recent === 'R';
+        return 'R' === $this->header->Recent;
     }
 
     public function isMarkAsUnread()
     {
-        return $this->header->Recent === 'N' || $this->header->Unseen === 'U';
+        return 'N' === $this->header->Recent || 'U' === $this->header->Unseen;
     }
 
     public function markAsAnswered()
@@ -229,12 +244,11 @@ class Message
         return $this->clearFlags(array('\\Seen'));
     }
 
-
     public function toString()
     {
         return  imap_fetchheader($this->stream, $this->uid, FT_UID)
-            . "\r\n"
-            . imap_body($this->stream, $this->uid, FT_UID | FT_PEEK)
+            ."\r\n"
+            .imap_body($this->stream, $this->uid, FT_UID | FT_PEEK)
         ;
     }
 
@@ -246,17 +260,13 @@ class Message
     private function parseBody()
     {
         $structure = imap_fetchstructure($this->stream, $this->uid, FT_UID);
-        if(isset($structure->parts) && !empty($structure->parts)) {
-            foreach($structure->parts as $key => $part) {
+        if (isset($structure->parts) && !empty($structure->parts)) {
+            foreach ($structure->parts as $key => $part) {
                 $this->parsePart($part, $key + 1);
             }
-        }
-        else {
+        } else {
             $this->parsePart($structure);
         }
-
-
-
 
         $this->isBodyParsed = true;
     }
@@ -264,15 +274,15 @@ class Message
     private function parsePart($part, $section = null)
     {
         // nested parts
-        if(isset($part->parts) && !empty($part->parts)) {
-            foreach($part->parts as $subSection => $subPart) {
+        if (isset($part->parts) && !empty($part->parts)) {
+            foreach ($part->parts as $subSection => $subPart) {
                 if (2 == $part->type
                     && 'RFC822' === $part->subtype
-                    && (!isset($part->disposition) || $part->disposition !== "attachment")
+                    && (!isset($part->disposition) || 'attachment' !== $part->disposition)
                 ) {
                     $this->parsePart($subPart, $section);
                 } else {
-                    $this->parsePart($subPart, $section . '.' . ($subSection + 1));
+                    $this->parsePart($subPart, $section.'.'.($subSection + 1));
                 }
             }
 
@@ -284,13 +294,11 @@ class Message
             foreach ($part->parameters as $row) {
                 $parameters[strtolower($row->attribute)] = $row->value;
             }
-
         }
         if ($part->ifdparameters) {
             foreach ($part->dparameters as $row) {
                 $parameters[strtolower($row->attribute)] = $row->value;
             }
-
         }
 
         if ($section) {
@@ -302,12 +310,10 @@ class Message
         // cf https://github.com/barbushin/php-imap/blob/master/src/PhpImap/Mailbox.php
         //      methode : protected function initMailPart
 
-
         // Nomaliser data ( => quoted print machin)
         // mapper data vers bodyplain, bodyhtml, attachments
         // attention :  - penser a concatener bodyplain et bodyhtml
         //              - penser a decoder (imap_qprint) puis convertir en utf-8 si besoin (utf8_encode)
-
 
         switch ($part->encoding) {
             case ENC7BIT:               // 0
@@ -329,10 +335,9 @@ class Message
                 break;
         }
 
-
-        switch($part->type) {
+        switch ($part->type) {
             case TYPETEXT:          // 0 : text plain or html
-                if (isset($parameters['charset']) &&  $parameters['charset'] == 'ISO-8859-1' ) {
+                if (isset($parameters['charset']) && 'ISO-8859-1' == $parameters['charset']) {
                     if ('iso-8859-1' === strtolower($parameters['charset'])) {
                         $data = utf8_encode($data);
                     }
@@ -358,7 +363,7 @@ class Message
                         ? $this->mimeDecode($parameters['filename'])
                         : (isset($parameters['name']))
                             ? $this->mimeDecode($parameters['name'])
-                            : uniqid((string)$section);
+                            : uniqid((string) $section);
 
                 $this->attachments[] = array(
                     'filename' => $filename,
