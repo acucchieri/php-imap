@@ -347,7 +347,20 @@ class Message
                 } elseif ('html' === strtolower($part->subtype)) {
                     $this->body['html'] .= $data;
                 } else {
-                    $this->body['other'] .= $data;
+                    if (isset($part->disposition) || 'attachment' !== $part->disposition) {
+                        $filename = (isset($parameters['filename']))
+                            ? $this->mimeDecode($parameters['filename'])
+                            : (isset($parameters['name']))
+                                ? $this->mimeDecode($parameters['name'])
+                                : uniqid((string) $section)
+                        ;
+                        $this->attachments[] = array(
+                            'filename' => $filename,
+                            'content' => $data,
+                        );
+                    } else {
+                        $this->body['other'] .= $data;
+                    }
                 }
                 break;
             case TYPEMULTIPART:     // 1 : multipart header
@@ -363,7 +376,8 @@ class Message
                         ? $this->mimeDecode($parameters['filename'])
                         : (isset($parameters['name']))
                             ? $this->mimeDecode($parameters['name'])
-                            : uniqid((string) $section);
+                            : uniqid((string) $section)
+                ;
 
                 $this->attachments[] = array(
                     'filename' => $filename,
