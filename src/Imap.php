@@ -124,6 +124,46 @@ class Imap
     }
 
     /**
+     * Read the list of mailboxes.
+     *
+     * @see https://www.php.net/manual/en/function.imap-list.php
+     *
+     * @param string $pattern Specifies where in the mailbox hierarchy to start searching.
+     *
+     * @return array|false Returns an array containing the names of the mailboxes or false in case of failure.
+     */
+    public function listMailboxes($pattern = '*')
+    {
+        $ref = sprintf('{%s:%s}',
+            $this->config['host'],
+            $this->config['port']
+        );
+
+        return imap_list($this->stream, $ref, $pattern);
+    }
+
+    /**
+     * Switch to the specified mailbox.
+     *
+     * @see https://www.php.net/manual/en/function.imap-reopen.php
+     *
+     * @param string $mailbox The mailbox name
+     * @param int    $options Bit mask of following options
+     *                          OP_READONLY - Open mailbox read-only
+     *                          OP_ANONYMOUS - Don't use or update a .newsrc for news (NNTP only)
+     *                          OP_HALFOPEN - For IMAP and NNTP names, open a connection but don't open a mailbox.
+     *                          OP_EXPUNGE - Silently expunge recycle stream
+     *                          CL_EXPUNGE - Expunge mailbox automatically upon mailbox close
+     * @param int    $retries Number of maximum connect attempts
+     *
+     * @return bool TRUE if the stream is reopened, FALSE otherwise.
+     */
+    public function switchMailbox($mailbox, $options = 0, $retries = 0)
+    {
+        return imap_reopen($this->stream, $mailbox, $options, $retries);
+    }
+    
+    /**
      * Delete all messages marked for deletion.
      *
      * @return bool TRUE
