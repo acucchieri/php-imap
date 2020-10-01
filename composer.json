@@ -3,12 +3,6 @@
     "description": "provides support for IMAP operations",
     "keywords": ["php", "imap"],
     "license": "MIT",
-    "authors": [
-        {
-            "name": "acucchieri",
-            "email": "https://github.com/acucchieri"
-        }
-    ],
     "require": {
         "php": ">=5.3.3",
         "ext-imap": "*"
