@@ -32,13 +32,18 @@ class Imap
             'user' => null,
             'password' => null,
             'flags' => array(),
+            'lazy' => false,
         ), $config);
 
-        $this->connect();
+        if (!$this->config['lazy']) {
+            $this->connect();
+        }
+
     }
 
     public function getStream()
     {
+
         return $this->stream;
     }
 
@@ -80,6 +85,10 @@ class Imap
      */
     public function search($criteria)
     {
+        if (!$this->stream) {
+            $this->connect();
+        }
+
         $messages = new MessageCollection();
 
         if ($results = imap_search($this->stream, $criteria, SE_UID)) {
@@ -102,6 +111,10 @@ class Imap
      */
     public function append($message, $folder = null, $options = null)
     {
+        if (!$this->stream) {
+            $this->connect();
+        }
+
         $mailbox = sprintf('{%s:%s}%s',
             $this->config['host'],
             $this->config['port'],
@@ -120,6 +133,10 @@ class Imap
      */
     public function check()
     {
+        if (!$this->stream) {
+            $this->connect();
+        }
+
         return imap_check($this->stream);
     }
 
@@ -134,6 +151,10 @@ class Imap
      */
     public function listMailboxes($pattern = '*')
     {
+        if (!$this->stream) {
+            $this->connect();
+        }
+
         $ref = sprintf('{%s:%s}',
             $this->config['host'],
             $this->config['port']
@@ -160,9 +181,13 @@ class Imap
      */
     public function switchMailbox($mailbox, $options = 0, $retries = 0)
     {
+        if (!$this->stream) {
+            $this->connect();
+        }
+
         return imap_reopen($this->stream, $mailbox, $options, $retries);
     }
-    
+
     /**
      * Delete all messages marked for deletion.
      *
@@ -170,6 +195,10 @@ class Imap
      */
     public function expunge()
     {
+        if (!$this->stream) {
+            $this->connect();
+        }
+        
         return imap_expunge($this->stream);
     }
 
