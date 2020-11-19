@@ -276,17 +276,26 @@ class Message
         // nested parts
         if (isset($part->parts) && !empty($part->parts)) {
             foreach ($part->parts as $subSection => $subPart) {
+                $notAttachment = (!isset($part->disposition) || 'attachment' !== $part->disposition);
                 if (2 == $part->type
                     && 'RFC822' === $part->subtype
-                    && (!isset($part->disposition) || 'attachment' !== $part->disposition)
+                    && $notAttachment
                 ) {
                     $this->parsePart($subPart, $section);
+//                } elseif (1 === $part->type
+//                    && 'ALTERNATIVE' === $part->subtype
+//                    && $notAttachment
+//                ) {
+//                    // https://github.com/barbushin/php-imap/issues/198
+//                    $this->parsePart($subPart, $section);
                 } else {
                     $this->parsePart($subPart, $section.'.'.($subSection + 1));
                 }
             }
 
             return;
+        } else {
+            $a = 1;
         }
 
         $parameters = array();
@@ -337,9 +346,11 @@ class Message
 
         switch ($part->type) {
             case TYPETEXT:          // 0 : text plain or html
-                if (isset($parameters['charset']) && 'ISO-8859-1' == $parameters['charset']) {
+                if (isset($parameters['charset']) && 'utf-8' !== strtolower($parameters['charset'])) {
                     if ('iso-8859-1' === strtolower($parameters['charset'])) {
                         $data = utf8_encode($data);
+                    } else {
+                        $data = iconv($parameters['charset'], "UTF-8//TRANSLIT//IGNORE", $data);
                     }
                 }
                 if ('plain' === strtolower($part->subtype)) {
