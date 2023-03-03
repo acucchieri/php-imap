@@ -1,0 +1,25 @@
+name: "CI"
+
+on:
+    pull_request:
+    push:
+        branches:
+            - "master"
+            - "ci-test"
+
+jobs:
+    phpstan:
+        name: "PHPStan"
+        runs-on: "ubuntu-latest"
+        strategy:
+            matrix:
+                php-version:
+                    - "8.1"
+        steps:
+            - uses: "actions/checkout@v3"
+            - uses: "shivammathur/setup-php@v2"
+              with:
+                  coverage: "none"
+                  php-version: "${{ matrix.php-version }}"
+            - uses: "ramsey/composer-install@v2"
+            - run: "vendor/bin/phpstan analyse src --level=7 --no-progress --error-format=github"
