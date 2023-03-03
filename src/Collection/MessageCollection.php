@@ -16,11 +16,16 @@ use AC\Imap\Message;
 /**
  * Messages Collection.
  *
+ * @extends \ArrayObject<int, Message>
+ *
  * @author acucchieri <https://github.com/acucchieri>
  */
 class MessageCollection extends \ArrayObject
 {
-    public function __construct(array $array = array())
+    /**
+     * @param array<Message> $array
+     */
+    public function __construct(array $array = [])
     {
         parent::__construct($array);
     }
@@ -28,21 +33,34 @@ class MessageCollection extends \ArrayObject
     /**
      * Set the internal pointer to the first element and returns it.
      *
-     * @return Message The first message of the collection
+     * @return Message|false The first message of the collection
      */
-    public function first()
+    public function first(): Message|false
     {
-        return reset($this);
+        if (!$this->count()) {
+            return false;
+        }
+
+        $iterator = new \ArrayIterator($this->toArray());
+        $iterator->rewind();
+
+        $a = $iterator->current();
+
+        return $iterator->current();
     }
 
     /**
      * Set the internal pointer to the last element and returns it.
      *
-     * @return Message The last message of the collection
+     * @return Message|false The last message of the collection
      */
-    public function last()
+    public function last(): Message|false
     {
-        return end($this);
+        if (!$this->count()) {
+            return false;
+        }
+
+        return $this[$this->count()-1] ?: false;
     }
 
     /**
@@ -52,7 +70,7 @@ class MessageCollection extends \ArrayObject
      *
      * @return MessageCollection
      */
-    public function add(Message $message)
+    public function add(Message $message): MessageCollection
     {
         $this->append($message);
 
@@ -64,22 +82,22 @@ class MessageCollection extends \ArrayObject
      *
      * @param Message $message The message
      *
-     * @return MessageCollection|false or FALSE if Message not found in the collection
+     * @return MessageCollection|null or FALSE if Message not found in the collection
      */
-    public function remove(Message $message)
+    public function remove(Message $message): MessageCollection|null
     {
-        $key = array_search($message, $this->toArray(), false);
+        $key = array_search($message, $this->toArray());
         if (false === $key) {
-            return false;
+            return null;
         }
-        $this->offsetUnset($key);
+        $this->offsetUnset((int)$key);
 
         return $this;
     }
 
-    public function clear()
+    public function clear(): MessageCollection
     {
-        $this->exchangeArray(array());
+        $this->exchangeArray([]);
 
         return $this;
     }
@@ -89,7 +107,7 @@ class MessageCollection extends \ArrayObject
      *
      * @return bool TRUE if the collection is empty, FALSE otherwise
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return 0 === $this->count();
     }
@@ -98,9 +116,9 @@ class MessageCollection extends \ArrayObject
      * Return a php array of Messages
      * Alias of \ArrayObject::getArrayCopy().
      *
-     * @return array
+     * @return array<Message>
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->getArrayCopy();
     }

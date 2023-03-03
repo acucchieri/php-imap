@@ -1,21 +1,3 @@
-php-imap
-========
-
-An object oriented PHP IMAP library.
-
-PHP >= 8.1 is required for version 2.x. For PHP 7 or earlier, use version 1.x.
-
-Installation
-------------
-
-```
-composer require acucchieri/php-imap
-```
-
-Usage
------
-
-``` php
 <?php
 
 use AC\Imap\Imap;
@@ -33,18 +15,7 @@ $imap = new Imap([
 /** @var \AC\Imap\Collection\MessageCollection $result */
 $result = $imap->search('FROM "foo@bar.tld"');
 
+/** @var \AC\Imap\Message $message */
 foreach ($result as $message) {
-    /** @var \AC\Imap\Message $message */
     var_dump($message->getSubject());
 }
-```
-
-Tests
------
-
-Create phpunit.xml file based on phpunit.xml.dist and populate environment variables.
-
-```
-./vendor/bin/phpunit
-```
-
