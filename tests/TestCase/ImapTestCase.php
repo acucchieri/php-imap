@@ -7,8 +7,8 @@ use PHPUnit\Framework\TestCase;
 
 class ImapTestCase extends TestCase
 {
-    protected static ?Imap $imap;
-    protected static ?string $from;
+    protected static Imap $imap;
+    protected static string $from;
 
     public static function setUpBeforeClass(): void
     {

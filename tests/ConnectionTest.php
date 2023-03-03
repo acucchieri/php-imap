@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class ConnectionTest extends TestCase
 {
-    public function testConnect()
+    public function testConnect(): void
     {
         $imap = new Imap([
             'host' => $_ENV['IMAP_HOST'],

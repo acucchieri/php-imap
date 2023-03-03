@@ -7,7 +7,6 @@ use AC\Imap\Tests\TestCase\ImapTestCase;
 
 class MessageTest extends ImapTestCase
 {
-    public const FROM = 'message-test@domain.tld';
     public const SUBJECT = 'MessageTest';
     public const BODY_PLAIN = 'MessageTest body';
 
@@ -15,7 +14,7 @@ class MessageTest extends ImapTestCase
 
     protected function setUp(): void
     {
-        $message = sprintf('From: %s', self::FROM)."\r\n"
+        $message = sprintf('From: %s', self::$from)."\r\n"
             ."To: to@domain.tld\r\n"
             .sprintf('Subject: %s', self::SUBJECT)."\r\n"
             ."\r\n"
@@ -23,7 +22,7 @@ class MessageTest extends ImapTestCase
 
         self::$imap->append($message);
 
-        $messages = self::$imap->search(sprintf('FROM "%s"', self::FROM));
+        $messages = self::$imap->search(sprintf('FROM "%s"', self::$from));
         $this->message = $messages->first();
     }
 
@@ -34,7 +33,7 @@ class MessageTest extends ImapTestCase
         self::$imap->expunge();
     }
 
-    public function testHeaders()
+    public function testHeaders(): void
     {
         $this->assertIsInt($this->message->getNo());
         $this->assertIsInt($this->message->getUid());
@@ -42,7 +41,7 @@ class MessageTest extends ImapTestCase
         $this->assertEquals(self::SUBJECT, $this->message->getSubject());
     }
 
-    public function testFlags()
+    public function testFlags(): void
     {
         $this->message->markAsUnread();
         $this->assertTrue($this->message->isMarkAsUnread());
@@ -76,11 +75,9 @@ class MessageTest extends ImapTestCase
 
         $this->message->setFlags([Message::FLAG_FLAGGED]);
         $this->assertCount(1, $this->message->getFlags());
-
-        var_dump($this->message->getBodyPlain());
     }
 
-    public function testGetBodyPlain()
+    public function testGetBodyPlain(): void
     {
         $this->assertEquals(self::BODY_PLAIN."\r\n", $this->message->getBodyPlain());
     }

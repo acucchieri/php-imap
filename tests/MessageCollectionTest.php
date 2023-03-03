@@ -8,7 +8,6 @@ use AC\Imap\Tests\TestCase\ImapTestCase;
 
 class MessageCollectionTest extends ImapTestCase
 {
-    public const FROM = 'message-collection-test@domain.tld';
     public const SUBJECT = 'MessageCollectionTest';
     public const BODY_PLAIN = 'MessageCollectionTest body';
 
@@ -17,7 +16,7 @@ class MessageCollectionTest extends ImapTestCase
     protected function setUp(): void
     {
         foreach ([1, 2, 3] as $no) {
-            $message = sprintf('From: %s', self::FROM)."\r\n"
+            $message = sprintf('From: %s', self::$from)."\r\n"
                 ."To: to@domain.tld\r\n"
                 .sprintf('Subject: %s %d', self::SUBJECT, $no)."\r\n"
                 ."\r\n"
@@ -26,7 +25,7 @@ class MessageCollectionTest extends ImapTestCase
             self::$imap->append($message);
         }
 
-        $this->messages = self::$imap->search(sprintf('FROM "%s"', self::FROM));
+        $this->messages = self::$imap->search(sprintf('FROM "%s"', self::$from));
     }
 
     protected function tearDown(): void
@@ -39,7 +38,7 @@ class MessageCollectionTest extends ImapTestCase
         self::$imap->expunge();
     }
 
-    public function testArrayObject()
+    public function testArrayObject(): void
     {
         $firstMessage = $this->messages->first();
         $lastMessage = $this->messages->last();
@@ -56,7 +55,7 @@ class MessageCollectionTest extends ImapTestCase
         $this->assertTrue(is_array($this->messages->toArray()));
     }
 
-    public function testClear()
+    public function testClear(): void
     {
         $messages = clone $this->messages;
         $messages->clear();

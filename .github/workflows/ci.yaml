@@ -5,7 +5,6 @@ on:
     push:
         branches:
             - "master"
-            - "ci-test"
 
 jobs:
     phpstan:
@@ -22,4 +21,4 @@ jobs:
                   coverage: "none"
                   php-version: "${{ matrix.php-version }}"
             - uses: "ramsey/composer-install@v2"
-            - run: "vendor/bin/phpstan analyse src --level=7 --no-progress --error-format=github"
+            - run: "vendor/bin/phpstan analyse src --level=9 --no-progress --error-format=github"

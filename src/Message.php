@@ -134,6 +134,9 @@ class Message
         return $this->attachments;
     }
 
+    /**
+     * @return array<string>
+     */
     public function getFlags(): array
     {
         $flags = [];

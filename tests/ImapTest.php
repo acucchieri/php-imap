@@ -7,15 +7,16 @@ use AC\Imap\Tests\TestCase\ImapTestCase;
 
 class ImapTest extends ImapTestCase
 {
-    public function testCheck()
+    public function testCheck(): void
     {
         $expected = '}'.$_ENV['IMAP_FOLDER'];
         $result = self::$imap->check();
 
+        $this->assertNotFalse($result);
         $this->assertStringEndsWith($expected, $result->Mailbox);
     }
 
-    public function testAppend()
+    public function testAppend(): void
     {
         $message = sprintf('From: %s', self::$from)."\r\n"
             ."To: to@domain.tld\r\n"
@@ -41,7 +42,7 @@ class ImapTest extends ImapTestCase
     /**
      * @depends testSearch
      */
-    public function testExpunge(MessageCollection $messages)
+    public function testExpunge(MessageCollection $messages): void
     {
         foreach ($messages as $message) {
             $message->markAsDeleted();
@@ -53,14 +54,14 @@ class ImapTest extends ImapTestCase
         $this->assertCount(0, $messages);
     }
 
-    public function testListMailbox()
+    public function testListMailbox(): void
     {
         $mailboxes = self::$imap->listMailboxes();
 
         $this->assertContains(self::$imap->getMailbox(), $mailboxes);
     }
 
-    public function testSwitchMailbox()
+    public function testSwitchMailbox(): void
     {
         $originalMailbox = self::$imap->getMailbox();
         $newMailbox = self::$imap->formatMailbox('INBOX');
